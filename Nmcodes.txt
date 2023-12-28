@@ -1,0 +1,354 @@
+2022
+#include <stdio.h>
+#include <math.h>
+
+double f(double x);
+
+double bisection(double a, double b, double e, int n)
+{
+    int i;
+    double c, fa, fb, fc;
+
+    fa = f(a);
+    fb = f(b);
+
+    for (i = 0; i < n; i++)
+    {
+        c = (a + b) / 2;
+        fc = f(c);
+
+        if (fc == 0)
+        {
+            return c;
+        }
+
+        if (fa * fc < 0)
+        {
+            b = c;
+            fb = fc;
+        }
+        else
+        {
+            a = c;
+            fa = fc;
+        }
+
+        if (fabs(b - a) < e)
+        {
+            return c;
+        }
+    }
+
+    return c;
+}
+Bisection 
+
+#include <stdio.h>
+
+double Lagrange(double x[], double y[], int n, double p)
+{
+    int i, j;
+    double sum = 0.0;
+    double product;
+
+    for (i = 0; i < n; i++)
+    {
+        product = y[i];
+
+        for (j = 0; j < n; j++)
+        {
+            if (j != i)
+            {
+                product = product * (p - x[j]) / (x[i] - x[j]);
+            }
+        }
+
+        sum = sum + product;
+    }
+
+    return sum;
+}
+Lagrange
+
+#include <stdio.h>
+#include <math.h>
+
+void Jacobi(int n, double a[n][n+1], double e, int m, double x[n])
+{
+    int i, j, k;
+    double sum, x_new[n], error;
+
+    for (i = 0; i < n; i++)
+    {
+        x[i] = 0;
+    }
+
+    for (k = 0; k < m; k++)
+    {
+        for (i = 0; i < n; i++)
+        {
+            sum = 0;
+
+            for (j = 0; j < n; j++)
+            {
+                if (j != i)
+                {
+                    sum = sum + a[i][j] * x[j];
+                }
+            }
+
+            x_new[i] = (a[i][n] - sum) / a[i][i];
+        }
+
+        error = 0;
+        for (i = 0; i < n; i++)
+        {
+            error = fmax(error, fabs(x_new[i] - x[i]) / x_new[i]);
+            x[i] = x_new[i];
+        }
+
+        if (error <= e)
+        {
+            return;
+        }
+    }
+}
+Jacobi
+
+#include <stdio.h>
+
+double Simpson(double a, double b, double h)
+{
+    int i;
+    double sum = 0.0;
+    int n = (int)((b - a) / h);
+
+    for (i = 0; i <= n - 2; i = i + 2)
+    {
+        sum = sum + (h / 3) * (f(a + i * h) + 4 * f(a + (i + 1) * h) + f(a + (i + 2) * h));
+    }
+
+    return sum;
+}
+
+double f(double x)
+{
+    return x * x + 3 * x + 1;
+}
+Simpson 1/3rd
+
+#include <stdio.h>
+#include <math.h>
+
+void GaussSeidel(int n, double a[n][n+1], double e, int m, double x[n])
+{
+    int i, j, k;
+    double sum, error;
+
+    for (i = 0; i < n; i++)
+    {
+        x[i] = 0;
+    }
+
+    for (k = 0; k < m; k++)
+    {
+        for (i = 0; i < n; i++)
+        {
+            sum = 0;
+
+            for (j = 0; j < n; j++)
+            {
+                if (j != i)
+                {
+                    sum = sum + a[i][j] * x[j];
+                }
+            }
+
+            x[i] = (a[i][n] - sum) / a[i][i];
+        }
+
+        error = 0;
+        for (i = 0; i < n; i++)
+        {
+            error = fmax(error, fabs(x[i] - x[i]) / x[i]);
+        }
+
+        if (error <= e)
+        {
+            return;
+        }
+    }
+}
+Gauss Sidel
+
+#include <stdio.h>
+
+double NewtonForwardInterpolation(double x[], double y[], int n, double value)
+{
+    double result = y[0];
+    double u = (value - x[0]) / (x[1] - x[0]);
+
+    for (int i = 1; i < n; i++)
+    {
+        double temp = y[i];
+        for (int j = i - 1; j >= 0; j--)
+        {
+            temp = temp * (u - j) + y[j];
+        }
+        result += temp;
+    }
+
+    return result;
+}
+Newton Forward
+
+#include <stdio.h>
+
+double NewtonBackwardInterpolation(double x[], double y[], int n, double value)
+{
+    double result = y[n - 1];
+    double u = (value - x[n - 1]) / (x[1] - x[0]);
+
+    for (int i = n - 2; i >= 0; i--)
+    {
+        result = (result * (value - x[i]) - y[i]) / (x[1] - x[0]);
+    }
+
+    return result;
+}
+Newton backward
+
+#include <stdio.h>
+#include <math.h>
+
+double FalsePositionMethod(double a, double b, double e, int n, double (*f)(double x))
+{
+    double c, fa, fb, fc;
+
+    fa = f(a);
+    fb = f(b);
+
+    if (fa * fb >= 0)
+    {
+        printf("The function does not change sign in the interval [a, b].\n");
+        return 0;
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        c = (a * fb - b * fa) / (fb - fa);
+        fc = f(c);
+
+        if (fc == 0)
+        {
+            return c;
+        }
+
+        if (fa * fc < 0)
+        {
+            b = c;
+            fb = fc;
+        }
+        else
+        {
+            a = c;
+            fa = fc;
+        }
+
+        if (fabs(b - a) < e)
+        {
+            return c;
+        }
+    }
+
+    printf("The method failed after %d iterations.\n", n);
+    return 0;
+}
+Regula falsi
+
+#include <stdio.h>
+
+double integrate(double a, double b, double h, double (*f)(double x))
+{
+    int n = (b - a) / h;
+    double result = 0.0;
+    for (int i = 1; i < n; i++)
+    {
+        result += f(a + i * h);
+    }
+    result = h * (f(a) + 2 * result + f(b)) / 2.0;
+    return result;
+}
+Trapezoidal
+
+#include <stdio.h>
+#include <math.h>
+
+double f(double x)
+{
+    // Function definition here
+}
+
+double fprime(double x)
+{
+    // Derivative of the function definition here
+}
+
+double newtonRaphson(double x0, double e, int n, double (*f)(double x), double (*fprime)(double x))
+{
+    double x1 = x0;
+    for (int i = 0; i < n; i++)
+    {
+        double fx = f(x1);
+        if (fabs(fx) < e)
+        {
+            return x1;
+        }
+        x1 = x1 - fx / fprime(x1);
+    }
+    return x1;
+}
+
+int main()
+{
+    double x0, e;
+    int n;
+    printf("Enter the initial estimate of the root (x0): ");
+    scanf("%lf", &x0);
+    printf("Enter the allowed relative error (e): ");
+    scanf("%lf", &e);
+    printf("Enter the maximum number of iterations (n): ");
+    scanf("%d", &n);
+    double root = newtonRaphson(x0, e, n, f, fprime);
+    printf("The root of the nonlinear equation is: %.6lf\n", root);
+    return 0;
+}
+Newton raphson 
+
+#include <math.h>
+
+void populate_augmented_matrix(int n, int m, double x[m], double y[m], double a[n][n + 1])
+{
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n + 1; j++)
+        {
+            a[i][j] = 0;
+            for (int k = 0; k < m; k++)
+            {
+                a[i][j] += pow(x[k], i + j);
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        double b = 0;
+        for (int k = 0; k < m; k++)
+        {
+            b += pow(x[k], i) * y[k];
+        }
+        a[i][n] = b;
+    }
+}
+Least square method 
